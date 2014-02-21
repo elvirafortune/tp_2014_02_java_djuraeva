@@ -1,4 +1,3 @@
-tp_2014_02_java_djuraeva
 
 Технопарк@Mail.ru
 ============
@@ -8,3 +7,4 @@ tp_2014_02_java_djuraeva
 
 ##Студент
 Джураева Эльвира, kolesofortuni, kolesofortuni@mail.ru
+Подробное о проекте можно прочесть на сайте Технопарка
