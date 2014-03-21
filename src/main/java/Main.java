@@ -1,6 +1,7 @@
 /**
  * Created by Elvira on 21.02.14.
  */
+
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -9,14 +10,15 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import javax.servlet.Servlet;
+import Frontend.Frontendl;
 
 public class Main
 {
     public static void main(String[] args) throws Exception
     {
-        Servlet frontend = new Frontend1();
+        Servlet frontend = new Frontendl();
 
-        Server server = new Server(8080);
+        Server server = new Server(8081);
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.addServlet(new ServletHolder(frontend), "/*");
 

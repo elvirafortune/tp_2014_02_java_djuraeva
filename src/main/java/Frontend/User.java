@@ -1,6 +1,5 @@
-/**
- * Created by Elvira on 21.02.14.
- */
+package Frontend;
+
 public class User {
     String username;
     String password;

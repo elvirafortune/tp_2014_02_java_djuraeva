@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="1915695279">
+    <data-source source="LOCAL" name="MySQL - @localhost" uuid="e988bc7b-d5ea-42e7-99af-392b8e7e2832">
+      <driver-ref>mysql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://localhost:3306</jdbc-url>
+      <user-name>root</user-name>
+      <user-password>df99df93df9adf9bdf93df9b</user-password>
+      <schema-pattern>mydb.*</schema-pattern>
+      <default-schemas>mydb.*</default-schemas>
+      <driver-properties>
+        <property name="zeroDateTimeBehavior" value="convertToNull" />
+        <property name="tinyInt1isBit" value="false" />
+      </driver-properties>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="hibernate.cfg.xml" uuid="ee3d08e9-9e48-4775-ba59-58a3369a32ec">
+      <driver-ref>mysql</driver-ref>
+      <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://localhost:3306/javadb</jdbc-url>
+      <user-name>maxim</user-name>
+      <user-password>df9bdf98df99df9edf9f</user-password>
+      <libraries />
+    </data-source>
+  </component>
+</project>
+

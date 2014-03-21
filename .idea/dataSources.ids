@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="dataSourceStorage">
+  <data-source source="LOCAL" name="MySQL - @localhost" uuid="e988bc7b-d5ea-42e7-99af-392b8e7e2832">
+    <database-info product="MySQL" version="5.6.16" jdbc-version="4.0" driver-name="MySQL Connector Java" driver-version="mysql-connector-java-5.1.26 ( Revision: ${bzr.revision-id} )">
+      <extra-name-characters>#@</extra-name-characters>
+      <identifier-quote-string>`</identifier-quote-string>
+    </database-info>
+    <case-sensitivity plain-identifiers="lower" quoted-identifiers="lower"/>
+    <schema name="" catalog="mydb"/>
+    <table name="user" schema="" catalog="mydb" type="TABLE">
+      <column name="idUser" sqlType="INT" length="10" precision="0" nullable="false" jdbcType="4"/>
+      <column name="password" sqlType="VARCHAR" length="45" precision="0" nullable="false" jdbcType="12"/>
+      <column name="username" sqlType="VARCHAR" length="45" precision="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="idUser"/>
+      <index name="idUser_UNIQUE" unique="true" columns="idUser"/>
+      <index name="username_UNIQUE" unique="true" columns="username"/>
+    </table>
+  </data-source>
+  <data-source source="LOCAL" name="hibernate.cfg.xml" uuid="ee3d08e9-9e48-4775-ba59-58a3369a32ec">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+</component>
