@@ -1,16 +1,29 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-    <title>Регистрация</title>
+    <title>Registration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+
+
 </head>
-<body>
-<form action = "registration" method="post">
-    Логин:  <input type="text" name="username" />
-    <br />
-    Пароль: <input type="text" name="password" />
-    <br />
-    <input type="submit" value="Зарегистрироваться"/>
-</form>
-<a href="/">Назад</a>
-<p>${result}</p>
+
+<body onload="goGetRegistered()">
+<div class="page">
+    <div class="main">
+        <div>Регистрация</div>
+        <form id="registerForm" action="/register" method="post">
+            <div>Логин: <input class="borderf" type="text" name="login" /></div>
+            <div>Пароль: <input class="borderf" type="password" name="password" /></div>
+            <input type="submit" class="sub borderf "name="button" value="ОК"/>
+        </form>
+        <div style="margin: 20px"><a class="back" href="/">Назад</a></div>
+        <div class="main" id="status"></div>
+        <div class="error"><#if error??>${error}</#if></div>
+    </div>
+</div>
+
 </body>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/LoadRegistered.js"></script>
 </html>

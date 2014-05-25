@@ -1,0 +1,6 @@
+<class type="utils.resources.Connection">
+    <PORT>8081</PORT>
+    <TEST_PORT>8082</TEST_PORT>
+    <DB>jdbc:mysql://localhost:3306/ejava</DB>
+<TEST_DB>jdbc:mysql://localhost:3306/etests</TEST_DB>
+        </class>

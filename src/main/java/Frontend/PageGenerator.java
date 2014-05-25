@@ -1,28 +1,35 @@
-package Frontend; /**
- * Created by Elvira on 21.02.14.
+package frontend;
+
+import freemarker.template.*;
+import java.util.*;
+import java.io.*;
+
+/*
+ * Created by elvira on 15.02.14.
  */
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+public class PageGenerator{
+    private static final String TEMPLATE_DIR = "tml";
+    private static final Configuration FREEMAKER_CONFIG;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Map;
+    static {
+        FREEMAKER_CONFIG = new Configuration();
+        try{
+            FREEMAKER_CONFIG.setDirectoryForTemplateLoading(new File(TEMPLATE_DIR));
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        FREEMAKER_CONFIG.setDefaultEncoding("UTF-8");
+    }
 
-public class PageGenerator {
-    private static final String HTML_DIR = "tml";
-    private static final Configuration CFG = new Configuration();
-
-    public static String getPage(String filename, Map<String, Object> data) {
+    public static String getPage(String templateName, Map<String, Object> data) {
         Writer stream = new StringWriter();
         try {
-            Template template = CFG.getTemplate(HTML_DIR + File.separator + filename);
+            Template template = FREEMAKER_CONFIG.getTemplate(templateName);
             template.process(data, stream);
-        } catch (IOException | TemplateException e) {
+        } catch (IOException | TemplateException | NullPointerException e) {
             e.printStackTrace();
         }
         return stream.toString();
     }
+
 }

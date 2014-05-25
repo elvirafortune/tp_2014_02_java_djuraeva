@@ -1,36 +1,36 @@
-/**
- * Created by Elvira on 21.02.14.
- */
-
-import org.eclipse.jetty.server.Handler;
+import database.HibernateSettings.HibernateUtil;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import server.ServerConnection;
+import utils.VFS.VFS;
+import utils.resources.Connection;
+import utils.resources.Resource;
+import utils.resources.URL;
 
-import javax.servlet.Servlet;
-import Frontend.Frontendl;
+import java.util.Iterator;
 
-public class Main
-{
-    public static void main(String[] args) throws Exception
-    {
-        Servlet frontend = new Frontendl();
+/*
+ * Created by elvira on 15.02.14.
+ */
+public class Main {
+    public static void main(String[] args) throws Exception {
 
-        Server server = new Server(8081);
-        ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        servletContextHandler.addServlet(new ServletHolder(frontend), "/*");
+        VFS vfs = new VFS("");
+        Iterator<String> files = vfs.getIterator("data");
+        while (files.hasNext()){
+            String nextFile = files.next();
+            if (!vfs.isDirectory(nextFile)){
+                utils.resources.Resources.getInstance().addResource(
+                        nextFile,
+                        utils.resources.Resources.getInstance().get(nextFile)
+                );
+            }
+        }
 
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.setDirectoriesListed(false);
-        resourceHandler.setResourceBase("static");
-
-        HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[]{resourceHandler, servletContextHandler});
-        server.setHandler(handlers);
-
+        HibernateUtil util = new HibernateUtil();
+        Connection con = (Connection)utils.resources.Resources.getInstance().getResource("data/connection.xml");
+        Server server = ServerConnection.connect(con.getPORT(), util);
         server.start();
         server.join();
     }
+
 }

@@ -1,167 +1,209 @@
-package Frontend;
-/**
- * Created by Elvira on 21.02.14.
- */
+package frontend;
+
+import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
+import frontend.UserSession;
+import message.Abonent;
+import message.Address;
+import message.Msg.*;
+import utils.resources.InfoMessages;
+import utils.resources.Resources;
+import utils.resources.Template;
+import utils.resources.URL;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import models.Factory;
+import java.util.*;
 
-import java.util.concurrent.atomic.AtomicLong;
+/*
+ * Created by elvira on 15.02.14.
+ */
 
-public class Frontendl extends HttpServlet {
+public class Frontendl extends HttpServlet implements Abonent, Runnable{
+    private static final DateFormat FORMATTER = new SimpleDateFormat("HH.mm.ss");
+    private final MessageService messageService;
+    private final Address address;
 
-    private static final AtomicLong idUserGenerator = new AtomicLong();
-    private Factory factory;
+    private Map<String, UserSession> sessionIdToUserSession = new HashMap<>();
+    private Map<String, String> sessionIdToRegistered = new HashMap<>();
 
-    public Frontendl(){
-        this.factory = new Factory();
+    public Frontendl(MessageService _messageService){
+        messageService = _messageService;
+        address = new Address();
+        messageService.addService(this);
+    }
+
+    public Address getAddress(){
+        return address;
     }
 
     public static String getTime() {
-        Date date = new Date();
-        DateFormat formatter = new SimpleDateFormat("HH.mm.ss");
-        return formatter.format(date);
-    } //сократить метод
+        return FORMATTER.format(new Date());
+    }
 
-    @Override
+    public void setUserSessionStatus(String sessionId, String status) {
+        UserSession userSession = sessionIdToUserSession.get(sessionId);
+        if (userSession == null) {
+            return;
+        }
+        userSession.setUserStatus(status);
+    }
+
+    public void setUserRegistrationStatus(String sessionId, String _status){
+        sessionIdToRegistered.put(sessionId, _status);
+    }
+
+    public void setSessionAuthStatus(String sessionId, UserSession userSession){
+        sessionIdToUserSession.put(sessionId, userSession);
+    }
+
     public void doGet(HttpServletRequest request,
-                      HttpServletResponse response) throws ServletException, IOException {
-
+                      HttpServletResponse response) throws ServletException, IOException
+    {
         response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        Map<String, Object> pageVariables = new HashMap<>();
-        HttpSession session= request.getSession();
-        String result;
-        try
-        {
-            result = session.getAttribute("result").toString();
-            session.removeAttribute("result");
+
+        final String path = request.getPathInfo();
+        String sessionID = request.getSession().getId();
+
+        URL urlResource = (URL) Resources.getInstance().getResource("data/url.xml");
+        Template templateResource = (Template) Resources.getInstance().getResource("data/template.xml");
+
+        if (path.equals(urlResource.getTIMER_PAGE())) {
+            UserSession userSession = sessionIdToUserSession.get(sessionID);
+            if (userSession == null){
+                response.sendRedirect(urlResource.getAUTHFORM());
+                return;
+            }
+            Map <String, Object> responseData = new HashMap<>();
+            responseData.put("refreshPeriod", "1000");
+            responseData.put("serverTime", getTime());
+            responseData.put("userID", userSession.getUserStatus());
+            sendPage(response, templateResource.getTIMER(), responseData);
+            return;
         }
-        catch (NullPointerException e)
-        {
-            result  = "";
+        if (path.equals(urlResource.getREGISTRATION_FORM())) {
+            sendPage(response, templateResource.getREGISTRATION(), "");
+            return;
         }
-        switch(request.getPathInfo()) {
-            case Remarks.Url.AUTHORIZATION:
-                if(result.equals("not"))
-                    pageVariables.put("result", Remarks.Warnings.FAIL );
-                else {
-                    pageVariables.put("result","");
-                }
-                response.getWriter().println(PageGenerator.getPage(Remarks.Page.AUTHORIZATION, pageVariables));
-                break;
-
-            case Remarks.Url.REGISTRATION:
-                switch(result) {
-                    case "error":
-                        pageVariables.put("result", Remarks.Warnings.FIELDS );
-                        break;
-                    case "User":
-                        pageVariables.put("result", Remarks.Warnings.USER );
-                        break;
-                    case "added":
-                        pageVariables.put("result", Remarks.Warnings.REGISTRATION );
-                        break;
-                    default:
-                        pageVariables.put("result","");
-                        break;
-                }
-                response.getWriter().println(PageGenerator.getPage(Remarks.Page.REGISTRATION, pageVariables));
-                break;
-
-            case Remarks.Url.SESSION:
-                Long idUser;
-                try
-                {
-                    idUser = (Long)session.getAttribute("idUser");
-                }
-                catch (NullPointerException e)
-                {
-                    idUser = null;
-                }
-                if(idUser == null)
-                {
-                    response.sendRedirect(Remarks.Url.INDEX);
-                }
-                pageVariables.put("refreshPeriod", Remarks.REFRESH_TIME);
-                pageVariables.put("serverTime", getTime());
-                pageVariables.put("idUser", idUser);
-                response.getWriter().println(PageGenerator.getPage(Remarks.Page.SESSION, pageVariables));
-                break;
-
-            case Remarks.Url.INDEX:
-                response.getWriter().println(PageGenerator.getPage(Remarks.Page.INDEX , pageVariables));
-                break;
-
-            default:
-                response.sendRedirect(Remarks.Url.INDEX);
+        if (path.equals(urlResource.getAUTHFORM())) {
+            sendPage(response, templateResource.getINDEX(), "");
+            return;
         }
+        if (path.equals("/getRegistered")) {
+            String current_status;
+            current_status = sessionIdToRegistered.get(sessionID);
+            sessionIdToRegistered.remove(sessionID);
+            if (current_status != null)
+                response.getWriter().println(current_status);
+            return;
+        }
+        response.sendRedirect("/");
     }
 
     public void doPost(HttpServletRequest request,
                        HttpServletResponse response) throws ServletException, IOException {
-        final String username = request.getParameter("username");
-        final String password = request.getParameter("password");
+
+        final String path = request.getPathInfo();
+        String login = request.getParameter("login");// .getParameter("login");
+        String pass = request.getParameter("password");
         response.setContentType("text/html;charset=utf-8");
+
         response.setStatus(HttpServletResponse.SC_OK);
-        HttpSession session = request.getSession();
-        switch (request.getPathInfo()) {
-            case Remarks.Url.AUTHORIZATION:
-                if(factory.findUser(username, password))
-                {
-                    try
-                    {
-                        if( session.getAttribute("idUser") != null )
-                        {
-                            session.removeAttribute("idUser");
-                        }
-                        Long idUser = idUserGenerator.getAndIncrement();
-                        session.setAttribute("idUser", idUser);
-                        session.removeAttribute("result");
-                        response.sendRedirect(Remarks.Url.SESSION);
-                    }
-                    catch (NullPointerException e)
-                    {
-                        response.sendRedirect(Remarks.Url.INDEX);
-                    }
-                }
-                else
-                {
-                    session.setAttribute("result" , "not");
-                    response.sendRedirect(Remarks.Url.AUTHORIZATION);
-                }
-                break;
 
-            case Remarks.Url.REGISTRATION :
-                if(username.equals("") || password.equals("")) {
-                    session.setAttribute("result", "error");
-                    response.sendRedirect(Remarks.Url.REGISTRATION );
-                }
-                else {
-                    if(!Factory.addUser(username , password)) {
-                        session.setAttribute("result", "User");
-                        response.sendRedirect(Remarks.Url.REGISTRATION);
-                    }
-                    else {
-                        session.setAttribute("result" , "added");
-                        response.sendRedirect(Remarks.Url.REGISTRATION);
-                    }
-                }
-                break;
+        URL urlResource = (URL) Resources.getInstance().getResource("data/url.xml");
+        Template templateResource = (Template) Resources.getInstance().getResource("data/template.xml");
+        InfoMessages infoMessagesResource = (InfoMessages) Resources.getInstance().getResource("data/info_messages.xml");
 
+        if (login.isEmpty() || pass.isEmpty()){
+            String template;
+            if (path.equals(urlResource.getLOGIN())){
+                template = templateResource.getINDEX();
+            }
+            else{
+                template = templateResource.getREGISTRATION();
+            }
+            sendPage(response, template, infoMessagesResource.getEMPTY_FIELDS());
+            return;
+        }
+
+        if (path.equals(urlResource.getLOGIN())) {
+            login(login, pass, request, response);
+            return;
+        }
+        if (path.equals(urlResource.getREGISTER())){
+            register(login, pass, request.getSession().getId(), response);
         }
     }
-}
 
-//два сервлета один с регистрацией, другой с регистрации
-// по имени найти датасет, найти юзера и проверить совпаадение пароля
+    public void sendPage(@NotNull HttpServletResponse response, @NotNull String tmpl,
+                          @Nullable String errorMsg) throws IOException{
+        Map <String, Object> responseData = new HashMap<>();
+        responseData.put("error", errorMsg);
+        response.getWriter().println(PageGenerator.getPage(tmpl, responseData));
+    }
+
+    public void sendPage(@NotNull HttpServletResponse response, @NotNull String tmpl,
+                          @NotNull Map<String, Object>responseData) throws IOException{
+        response.getWriter().println(PageGenerator.getPage(tmpl, responseData));
+    }
+
+    private void login(String login, String pass, HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException
+    {
+        HttpSession session = request.getSession();
+        if(!session.isNew())
+        {
+            session.invalidate();
+            session = request.getSession();
+        }
+        String sessionID = session.getId();
+        UserSession userSession = new UserSession(sessionID, login, messageService.getAddressService());
+        sessionIdToUserSession.put(sessionID, userSession);
+        userSession.setUserStatus("wait for authorization");
+
+        Address FrontendlAddress = getAddress();
+        Address accountServiceAddress = userSession.getAccountServiceAddress();
+
+        Msg message = createMsgGetUserID(FrontendlAddress, accountServiceAddress, login, pass, sessionID);
+        messageService.sendMessage(message);
+
+        response.sendRedirect("/timer");
+    }
+
+    private void register(String login, String pass, String sessionId, HttpServletResponse response)
+            throws ServletException, IOException
+    {
+        Address FrontendlAddress = getAddress();
+        Address accountServiceAddress = messageService.getAddressService().getAccountServiceAddress();
+        MsgRegUser msg = createMsgRegUser(FrontendlAddress, accountServiceAddress, login, pass, sessionId);
+        messageService.sendMessage(msg);
+        Template templateResource = (Template) Resources.getInstance().getResource("data/template.xml");
+        sendPage(response, templateResource.getREGISTRATION(), "wait");
+    }
+
+    @Override
+    @SuppressWarnings("InfiniteLoopStatement")
+    public void run() {
+        while (true) {
+            messageService.execForAbonent(this);
+            try{
+                Thread.sleep(100);
+            }
+            catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public MsgGetUserID createMsgGetUserID(Address from, Address to, String login, String pass, String sessionId){
+        return new MsgGetUserID(from, to, login, pass, sessionId);
+    }
+
+    public MsgRegUser createMsgRegUser(Address from, Address to, String login, String pass, String sessionId){
+        return new MsgRegUser(from, to, login, pass, sessionId);
+    }
+
+}

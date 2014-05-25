@@ -1,0 +1,7 @@
+<class type="utils.resources.InfoMessages">
+    <WRONG_PASSWORD>Wrong password!</WRONG_PASSWORD>
+    <EMPTY_FIELDS>All fields must be filled!</EMPTY_FIELDS>
+    <DUPLICATE_LOGIN>Choose another login!</DUPLICATE_LOGIN>
+    <NOT_REGISTERED>Not registered!</NOT_REGISTERED>
+    <DB_UNREACHABLE>DB unreachable</DB_UNREACHABLE>
+</class>
