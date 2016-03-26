@@ -5,7 +5,7 @@
 Учебный период: весенний семестр 2014г.
 
 ##Студент
-Джураева Эльвира, kolesofortuni, kolesofortuni@mail.ru
+kolesofortuni, kolesofortuni@mail.ru
 
 Подробное о проекте можно прочесть на сайте [Технопарка] [1]
 [1]: tp.mail.ru
